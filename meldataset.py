@@ -308,7 +308,11 @@ class MelDataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         filename = self.audio_files[index]
         if self._cache_ref_count == 0:
-            audio, sampling_rate = load_wav(filename)
+            try:
+                audio, sampling_rate = load_wav(filename)
+            except Exception as er:
+                print(filename)
+
             audio = audio / MAX_WAV_VALUE
             if not self.fine_tuning:
                 audio = normalize(audio) * 0.95
