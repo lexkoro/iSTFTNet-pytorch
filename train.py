@@ -24,6 +24,10 @@ from models import (
     generator_loss,
     discriminator_loss,
 )
+from discriminators import (
+    ResWiseMultiPeriodDiscriminator,
+    ResWiseMultiScaleDiscriminator,
+)
 from utils import plot_spectrogram, scan_checkpoint, load_checkpoint, save_checkpoint
 from stft import STFT
 
@@ -43,8 +47,8 @@ def train(rank, a, h):
     device = torch.device("cuda:{:d}".format(rank))
 
     generator = Generator(h).to(device)
-    mpd = MultiPeriodDiscriminator().to(device)
-    msd = MultiScaleDiscriminator().to(device)
+    mpd = ResWiseMultiPeriodDiscriminator().to(device)
+    msd = ResWiseMultiScaleDiscriminator().to(device)
     mrsd = MultiResSpecDiscriminator().to(device)
 
     stft = STFT(filter_length=16, hop_length=8, win_length=16).to(device)
@@ -279,6 +283,9 @@ def train(rank, a, h):
                         {
                             "mpd": (mpd.module if h.num_gpus > 1 else mpd).state_dict(),
                             "msd": (msd.module if h.num_gpus > 1 else msd).state_dict(),
+                            "mrsd": (
+                                mrsd.module if h.num_gpus > 1 else mrsd
+                            ).state_dict(),
                             "optim_g": optim_g.state_dict(),
                             "optim_d": optim_d.state_dict(),
                             "steps": steps,
