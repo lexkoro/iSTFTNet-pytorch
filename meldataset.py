@@ -191,9 +191,9 @@ hann_window = {}
 def mel_spectrogram(
     y, n_fft, num_mels, sampling_rate, hop_size, win_size, fmin, fmax, center=False
 ):
-    #if torch.min(y) < -1.0:
+    # if torch.min(y) < -1.0:
     #    print("min value is ", torch.min(y))
-    #if torch.max(y) > 1.0:
+    # if torch.max(y) > 1.0:
     #    print("max value is ", torch.max(y))
 
     global mel_basis, hann_window
@@ -288,6 +288,14 @@ class MelDataset(torch.utils.data.Dataset):
         self.device = device
         self.fine_tuning = fine_tuning
         self.base_mels_path = base_mels_path
+        self.upsample = transforms.Resample(
+            orig_freq=22050,
+            new_freq=44100,
+            resampling_method="kaiser_window",
+            lowpass_filter_width=6,
+            rolloff=0.99,
+            dtype=torch.float32,
+        )
         self.downsample = transforms.Resample(
             orig_freq=44100,
             new_freq=22050,
@@ -342,14 +350,25 @@ class MelDataset(torch.utils.data.Dataset):
                         audio, (0, self.segment_size - audio.size(1)), "constant"
                     )
 
-            downsampled_audio = self.downsample(audio)
+            if True:
+                augmented_audio = self.augment(audio)
+            use_augmented = hasattr(augmented_audio, "shape") and (
+                augmented_audio.shape == audio.shape
+            )
+            if not use_augmented:
+                print(
+                    "Shape mismatch, audio not augmented",
+                    audio.shape,
+                    augmented_audio.shape,
+                )
+
             mel = mel_spectrogram(
-                downsampled_audio,
+                augmented_audio if use_augmented else audio,
                 self.n_fft,
                 self.num_mels,
-                self.sampling_rate // 2,
-                self.hop_size // 2,
-                self.win_size // 2,
+                self.sampling_rate,
+                self.hop_size,
+                self.win_size,
                 self.fmin,
                 self.fmax,
                 center=False,
@@ -402,3 +421,19 @@ class MelDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.audio_files)
+
+    def augment(self, audio):
+        target_len = audio.size(1)
+        augmented_audio = self.downsample(audio)
+        augmented_audio = augmented_audio.squeeze(0).cpu().float().numpy()
+        augmented_audio = self.augmentor(
+            samples=augmented_audio,
+            sample_rate=22050,
+        )
+        augmented_audio = normalize(augmented_audio) * 0.95
+        augmented_audio = torch.FloatTensor(augmented_audio).unsqueeze(0)
+        augmented_audio = self.upsample(augmented_audio)
+        diff = augmented_audio.size(1) - target_len
+        if diff > 0 and diff <= 3:
+            augmented_audio = augmented_audio[:, :-diff]
+        return augmented_audio
