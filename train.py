@@ -73,11 +73,11 @@ def train(rank, a, h):
         last_epoch = -1
     else:
         state_dict_g = load_checkpoint(cp_g, device)
-        state_dict_do = load_checkpoint(cp_do, device)
+        state_dict_do = None  # load_checkpoint(cp_do, device)
         generator.load_state_dict(state_dict_g["generator"])
         # mpd.load_state_dict(state_dict_do["mpd"])
-        msd.load_state_dict(state_dict_do["msd"])
-        mrsd.load_state_dict(state_dict_do["mrsd"])
+        # msd.load_state_dict(state_dict_do["msd"])
+        # mrsd.load_state_dict(state_dict_do["mrsd"])
         # steps = state_dict_do["steps"] + 1
         last_epoch = -1
         last_epoch = state_dict_do["epoch"]
@@ -99,7 +99,7 @@ def train(rank, a, h):
 
     if state_dict_do is not None:
         optim_g.load_state_dict(state_dict_do["optim_g"])
-        # optim_d.load_state_dict(state_dict_do["optim_d"])
+        optim_d.load_state_dict(state_dict_do["optim_d"])
 
     scheduler_g = torch.optim.lr_scheduler.ExponentialLR(
         optim_g, gamma=h.lr_decay, last_epoch=last_epoch
