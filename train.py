@@ -76,8 +76,8 @@ def train(rank, a, h):
         state_dict_do = None  # load_checkpoint(cp_do, device)
         generator.load_state_dict(state_dict_g["generator"])
         # mpd.load_state_dict(state_dict_do["mpd"])
-        msd.load_state_dict(state_dict_do["msd"])
-        mrsd.load_state_dict(state_dict_do["mrsd"])
+        # msd.load_state_dict(state_dict_do["msd"])
+        # mrsd.load_state_dict(state_dict_do["mrsd"])
         # steps = state_dict_do["steps"] + 1
         last_epoch = -1
         # last_epoch = state_dict_do["epoch"]
