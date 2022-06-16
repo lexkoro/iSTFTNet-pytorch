@@ -80,7 +80,7 @@ def train(rank, a, h):
         # mrsd.load_state_dict(state_dict_do["mrsd"])
         # steps = state_dict_do["steps"] + 1
         last_epoch = -1
-        last_epoch = state_dict_do["epoch"]
+        # last_epoch = state_dict_do["epoch"]
 
     if h.num_gpus > 1:
         generator = DistributedDataParallel(generator, device_ids=[rank]).to(device)
