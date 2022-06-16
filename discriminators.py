@@ -267,15 +267,13 @@ class ResWiseMultiPeriodDiscriminator(torch.nn.Module):
         super(ResWiseMultiPeriodDiscriminator, self).__init__()
         self.discriminators = nn.ModuleList(
             [
-                DiscriminatorP(2),
                 DiscriminatorP(3),
                 DiscriminatorP(5),
                 DiscriminatorP(7),
                 DiscriminatorP(11),
-                DiscriminatorP(13),
                 DiscriminatorP(17),
-                DiscriminatorP(19),
                 DiscriminatorP(23),
+                DiscriminatorP(37),
             ]
         )
 
