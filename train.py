@@ -28,7 +28,13 @@ from discriminators import (
     ResWiseMultiPeriodDiscriminator,
     ResWiseMultiScaleDiscriminator,
 )
-from utils import plot_spectrogram, scan_checkpoint, load_checkpoint, save_checkpoint
+from utils import (
+    plot_spectrogram,
+    scan_checkpoint,
+    load_checkpoint,
+    save_checkpoint,
+    set_init_dict,
+)
 from stft import STFT
 
 torch.backends.cudnn.benchmark = True
@@ -72,7 +78,8 @@ def train(rank, a, h):
         # mpd.load_state_dict(state_dict_do["mpd"])
         msd.load_state_dict(state_dict_do["msd"])
         mrsd.load_state_dict(state_dict_do["mrsd"])
-        steps = state_dict_do["steps"] + 1
+        # steps = state_dict_do["steps"] + 1
+        last_epoch = -1
         last_epoch = state_dict_do["epoch"]
 
     if h.num_gpus > 1:
@@ -92,7 +99,7 @@ def train(rank, a, h):
 
     if state_dict_do is not None:
         optim_g.load_state_dict(state_dict_do["optim_g"])
-        optim_d.load_state_dict(state_dict_do["optim_d"])
+        # optim_d.load_state_dict(state_dict_do["optim_d"])
 
     scheduler_g = torch.optim.lr_scheduler.ExponentialLR(
         optim_g, gamma=h.lr_decay, last_epoch=last_epoch
