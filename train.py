@@ -54,7 +54,6 @@ def train(rank, a, h):
     stft = STFT(filter_length=16, hop_length=8, win_length=16).to(device)
 
     if rank == 0:
-        print(generator)
         os.makedirs(a.checkpoint_path, exist_ok=True)
         print("checkpoints directory : ", a.checkpoint_path)
 
