@@ -73,14 +73,13 @@ def train(rank, a, h):
         last_epoch = -1
     else:
         state_dict_g = load_checkpoint(cp_g, device)
-        state_dict_do = None  # load_checkpoint(cp_do, device)
+        state_dict_do = load_checkpoint(cp_do, device)
         generator.load_state_dict(state_dict_g["generator"])
-        # mpd.load_state_dict(state_dict_do["mpd"])
-        # msd.load_state_dict(state_dict_do["msd"])
-        # mrsd.load_state_dict(state_dict_do["mrsd"])
-        # steps = state_dict_do["steps"] + 1
-        last_epoch = -1
-        # last_epoch = state_dict_do["epoch"]
+        mpd.load_state_dict(state_dict_do["mpd"])
+        msd.load_state_dict(state_dict_do["msd"])
+        mrsd.load_state_dict(state_dict_do["mrsd"])
+        steps = state_dict_do["steps"] + 1
+        last_epoch = state_dict_do["epoch"]
 
     if h.num_gpus > 1:
         generator = DistributedDataParallel(generator, device_ids=[rank]).to(device)
